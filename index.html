@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hifz Active Recall</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="container">
+        <header>
+            <h1>Hifz Recall Tool</h1>
+            <p class="subtitle">Designed for active recall during Qur’an memorization.</p>
+        </header>
+
+        <section id="setup-panel">
+            <div class="control-group">
+                <label for="surah-select">Select Surahs to Practice:</label>
+                <select id="surah-select" multiple size="8">
+                    <option disabled>Loading data...</option>
+                </select>
+                <p class="instruction-text">Hold Ctrl/Cmd to select multiple.</p>
+            </div>
+            
+            <button id="btn-start" class="btn primary">Start Session</button>
+        </section>
+
+        <section id="session-panel" class="hidden">
+            
+            <div class="trigger-container">
+                <p class="label">Starting Verse:</p>
+                <div id="verse-trigger" class="arabic-text"></div>
+            </div>
+
+            <div id="recall-prompt" class="prompt-box">
+                Recall the next verses, then click Reveal.
+            </div>
+
+            <div id="revealed-container"></div>
+
+            <div class="action-bar">
+                <button id="btn-reveal" class="btn action">Reveal Next 5</button>
+                <button id="btn-next" class="btn secondary">Next Challenge</button>
+                <button id="btn-reset" class="btn secondary">End Session</button>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
