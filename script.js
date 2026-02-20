@@ -158,6 +158,59 @@ ui.btnReveal.addEventListener('click', () => {
 ui.btnReset.addEventListener('click', () => {
     ui.sessionPanel.classList.add('hidden');
     ui.setupPanel.classList.remove('hidden');
+    
+    // Trigger feedback logic when session ends
+    checkFirstTimeFeedback();
 });
+
+// Replace with your actual Formspree URL
+const FORMSPREE_URL = "https://formspree.io/f/mojnnwpa"; 
+
+function checkFirstTimeFeedback() {
+    const hasSubmitted = localStorage.getItem("feedbackSubmitted");
+    if (!hasSubmitted) {
+        document.getElementById('feedback-modal').classList.remove('hidden');
+    }
+}
+
+document.getElementById('feedback-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('fb-submit');
+    const form = e.target;
+    
+    // Prepare data
+    const formData = new FormData(form);
+    
+    // Visual feedback
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
+
+    try {
+        const response = await fetch(FORMSPREE_URL, {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+            // Success: Set flag and update UI
+            localStorage.setItem("feedbackSubmitted", "true");
+            form.classList.add('hidden');
+            document.getElementById('fb-success').classList.remove('hidden');
+            
+            // Auto-hide modal after 3 seconds
+            setTimeout(() => {
+                document.getElementById('feedback-modal').classList.add('hidden');
+            }, 3000);
+        } else {
+            throw new Error("Submission failed");
+        }
+    } catch (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Try Again";
+        alert("Oops! There was a problem sending your feedback.");
+    }
+});
+
 
 init();

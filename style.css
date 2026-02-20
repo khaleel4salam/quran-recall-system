@@ -130,6 +130,58 @@ select {
     text-align: center;
 }
 
+
+/* Feedback Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    text-align: left; /* Keep form fields readable */
+}
+
+.modal-card h3 { margin-top: 0; }
+
+.field { margin-bottom: 1rem; }
+
+.field label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+}
+
+.field input, .field textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.field textarea { height: 100px; resize: vertical; }
+
+.success-msg {
+    color: var(--accent);
+    font-weight: 600;
+    text-align: center;
+}
+
 .btn:active { transform: scale(0.98); }
 
 .btn.primary { background-color: var(--accent); color: white; }

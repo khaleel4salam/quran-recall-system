@@ -48,6 +48,30 @@
 
     </main>
 
+    <div id="feedback-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3>Share Your Feedback</h3>
+            <p>This is your first session! How was your experience?</p>
+            
+            <form id="feedback-form">
+                <div class="field">
+                    <label for="fb-name">Name</label>
+                    <input type="text" id="fb-name" name="name" required placeholder="Your name">
+                </div>
+                <div class="field">
+                    <label for="fb-message">Message</label>
+                    <textarea id="fb-message" name="message" required placeholder="Suggestions or thoughts..."></textarea>
+                </div>
+                <div class="fb-actions">
+                    <button type="submit" id="fb-submit" class="btn primary">Send Feedback</button>
+                </div>
+            </form>
+            <div id="fb-success" class="hidden">
+                <p class="success-msg">✅ Thank you! Your feedback helps improve this tool.</p>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
