@@ -152,7 +152,7 @@ select {
     width: 90%;
     max-width: 450px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    text-align: left; /* Keep form fields readable */
+    text-align: left;
 }
 
 .modal-card h3 { margin-top: 0; }
