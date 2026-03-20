@@ -1,11 +1,8 @@
-/* * Active Recall Logic
- * 1. Data Parsing: Reads local file, groups by Surah.
- * 2. Session: Flattens selected Surahs into a single array.
- * 3. Next/Random: Jumps to a random index in that array.
- * 4. Reveal: Slices the array sequentially from the current index.
+/**
+ * Hifz Pro - Active Recall Logic
+ * Professional Version
  */
 
-// Static Data: Surah Names (1-114)
 const SURAH_NAMES = [
     "Al-Fatiha", "Al-Baqarah", "Ali 'Imran", "An-Nisa", "Al-Ma'idah", "Al-An'am", "Al-A'raf", "Al-Anfal", "At-Tawbah", "Yunus",
     "Hud", "Yusuf", "Ar-Ra'd", "Ibrahim", "Al-Hijr", "An-Nahl", "Al-Isra", "Al-Kahf", "Maryam", "Ta-Ha",
@@ -28,28 +25,34 @@ const state = {
 };
 
 const ui = {
+    sidebar: document.querySelector('.sidebar'),
     setupPanel: document.getElementById('setup-panel'),
     sessionPanel: document.getElementById('session-panel'),
+    emptyState: document.getElementById('empty-state'),
     surahSelect: document.getElementById('surah-select'),
     verseTrigger: document.getElementById('verse-trigger'),
     revealedContainer: document.getElementById('revealed-container'),
     btnStart: document.getElementById('btn-start'),
     btnReveal: document.getElementById('btn-reveal'),
-    btnNext: document.getElementById('btn-next'), // NEW REFERENCE
+    btnNext: document.getElementById('btn-next'),
     btnReset: document.getElementById('btn-reset'),
-    prompt: document.getElementById('recall-prompt')
+    sessionInfo: document.getElementById('session-info'),
+    currentSurahDisplay: document.getElementById('current-surah-display'),
+    ayahDisplay: document.getElementById('ayah-number-display'),
+    menuToggle: document.getElementById('mobile-menu-toggle')
 };
 
 async function init() {
     try {
         const response = await fetch('quran.txt');
-        if (!response.ok) throw new Error("Could not load quran.txt");
+        if (!response.ok) throw new Error("File not found");
         const text = await response.text();
         parseData(text);
         populateDropdown();
     } catch (error) {
         console.error(error);
-        alert("Error: Ensure 'quran.txt' is present and you are using a local server.");
+        ui.btnStart.textContent = "Data Error";
+        alert("Make sure 'quran.txt' is loaded via a local server.");
     }
 }
 
@@ -65,152 +68,139 @@ function parseData(text) {
 
 function populateDropdown() {
     ui.surahSelect.innerHTML = ''; 
-    const sortedSurahs = Object.keys(state.surahMap).sort((a, b) => a - b);
-    sortedSurahs.forEach(surahNum => {
-        const option = document.createElement('option');
-        option.value = surahNum;
-        const name = SURAH_NAMES[surahNum - 1] || "Unknown";
-        option.textContent = `${surahNum}. ${name}`; 
-        ui.surahSelect.appendChild(option);
+    Object.keys(state.surahMap).sort((a, b) => a - b).forEach(num => {
+        const opt = document.createElement('option');
+        opt.value = num;
+        opt.textContent = `${num}. ${SURAH_NAMES[num - 1]}`; 
+        ui.surahSelect.appendChild(opt);
     });
 }
 
-// --- Session Logic ---
-
-ui.btnStart.addEventListener('click', () => {
-    const selectedOptions = Array.from(ui.surahSelect.selectedOptions);
-    if (selectedOptions.length === 0) return alert("Select at least one Surah.");
-
-    // Prepare Queue
-    const selectedSurahNums = selectedOptions.map(opt => opt.value);
-    
-    // Shuffle Surah Order
-    for (let i = selectedSurahNums.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [selectedSurahNums[i], selectedSurahNums[j]] = [selectedSurahNums[j], selectedSurahNums[i]];
-    }
-
-    // Flatten
-    state.sessionQueue = [];
-    selectedSurahNums.forEach(num => {
-        state.sessionQueue.push(...state.surahMap[num]);
+// Mobile Nav Toggle
+if (ui.menuToggle) {
+    ui.menuToggle.addEventListener('click', () => {
+        ui.sidebar.classList.toggle('active');
+        ui.menuToggle.innerHTML = ui.sidebar.classList.contains('active') ? 
+            '<span class="material-symbols-rounded">close</span>' : 
+            '<span class="material-symbols-rounded">menu</span>';
     });
+}
 
-    // Switch View
-    ui.setupPanel.classList.add('hidden');
-    ui.sessionPanel.classList.remove('hidden');
+// Start Session
+ui.btnStart.addEventListener('click', () => {
+    const selected = Array.from(ui.surahSelect.selectedOptions).map(o => o.value);
+    if (selected.length === 0) return alert("Select at least one Surah.");
 
-    // Trigger First Challenge
-    nextChallenge();
+    ui.btnStart.textContent = "Preparing...";
+    
+    setTimeout(() => {
+        state.sessionQueue = [];
+        selected.sort(() => Math.random() - 0.5).forEach(num => {
+            state.sessionQueue.push(...state.surahMap[num]);
+        });
+
+        ui.emptyState.classList.add('hidden'); 
+        ui.setupPanel.classList.add('hidden');
+        ui.sessionPanel.classList.remove('hidden');
+        ui.sessionInfo.classList.remove('hidden');
+        ui.sidebar.classList.remove('active');
+        
+        // Reset Mobile Menu Icon
+        ui.menuToggle.innerHTML = '<span class="material-symbols-rounded">menu</span>';
+        ui.btnStart.textContent = "Start Session"; 
+
+        nextChallenge();
+    }, 400);
 });
 
-/**
- * NEW: Jumps to a random spot in the existing queue
- */
 function nextChallenge() {
-    // Reset UI
     ui.revealedContainer.innerHTML = ''; 
-    ui.prompt.style.display = 'block';
     ui.btnReveal.disabled = false;
+    ui.btnReveal.style.opacity = "1";
+    ui.btnReveal.innerHTML = '<span class="material-symbols-rounded">visibility</span>';
 
-    // Pick Random Index (avoiding very last verse)
     const maxStart = Math.max(0, state.sessionQueue.length - 6); 
     state.currentIndex = Math.floor(Math.random() * (maxStart + 1));
 
-    // Display Trigger
-    const verse = state.sessionQueue[state.currentIndex];
-    ui.verseTrigger.textContent = verse.content;
+    const v = state.sessionQueue[state.currentIndex];
+    ui.verseTrigger.textContent = v.content;
+    ui.currentSurahDisplay.textContent = SURAH_NAMES[v.surah - 1];
+    ui.ayahDisplay.textContent = `Ayah ${v.ayah}`;
     
-    // Increment so "Reveal" shows what follows
     state.currentIndex++;
 }
 
-// Listen for "Next Challenge" click
 ui.btnNext.addEventListener('click', nextChallenge);
 
 ui.btnReveal.addEventListener('click', () => {
-    ui.prompt.style.display = 'none';
-
     const remaining = state.sessionQueue.length - state.currentIndex;
     const batchSize = Math.min(5, remaining);
+    if (batchSize <= 0) return;
 
-    if (batchSize <= 0) {
-        ui.btnReveal.disabled = true;
-        return;
-    }
-
-    const batchContainer = document.createElement('div');
-    batchContainer.className = 'revealed-block';
+    const block = document.createElement('div');
+    block.className = 'revealed-block';
 
     for (let i = 0; i < batchSize; i++) {
-        const verse = state.sessionQueue[state.currentIndex];
+        const v = state.sessionQueue[state.currentIndex];
         const p = document.createElement('p');
         p.className = 'arabic-text';
-        p.textContent = verse.content; 
-        batchContainer.appendChild(p);
+        p.textContent = v.content; 
+        block.appendChild(p);
         state.currentIndex++;
     }
 
-    ui.revealedContainer.appendChild(batchContainer);
-    batchContainer.scrollIntoView({ behavior: 'smooth' });
+    ui.revealedContainer.appendChild(block);
+    
+    if (state.sessionQueue.length - state.currentIndex <= 0 || batchSize < 5) {
+        ui.btnReveal.disabled = true;
+        ui.btnReveal.style.opacity = "0.3";
+        ui.btnReveal.innerHTML = '<span class="material-symbols-rounded">done_all</span>';
+    }
+
+    setTimeout(() => block.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
 });
 
+// End Session & Trigger Feedback
 ui.btnReset.addEventListener('click', () => {
+    if(!confirm("Exit session?")) return;
     ui.sessionPanel.classList.add('hidden');
+    ui.sessionInfo.classList.add('hidden');
+    ui.emptyState.classList.remove('hidden'); 
     ui.setupPanel.classList.remove('hidden');
+    ui.sidebar.classList.remove('active');
     
-    // Trigger feedback logic when session ends
     checkFirstTimeFeedback();
 });
 
-// Replace with your actual Formspree URL
-const FORMSPREE_URL = "https://formspree.io/f/mojnnwpa"; 
+// --- Feedback Modal Logic ---
+const fbModal = document.getElementById('feedback-modal');
+const fbForm = document.getElementById('feedback-form');
 
 function checkFirstTimeFeedback() {
-    const hasSubmitted = localStorage.getItem("feedbackSubmitted");
+    const hasSubmitted = localStorage.getItem("hifzFeedbackSubmitted");
     if (!hasSubmitted) {
-        document.getElementById('feedback-modal').classList.remove('hidden');
+        fbModal.classList.remove('hidden');
     }
 }
 
-document.getElementById('feedback-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const submitBtn = document.getElementById('fb-submit');
-    const form = e.target;
-    
-    // Prepare data
-    const formData = new FormData(form);
-    
-    // Visual feedback
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Sending...";
-
-    try {
-        const response = await fetch(FORMSPREE_URL, {
-            method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (response.ok) {
-            // Success: Set flag and update UI
-            localStorage.setItem("feedbackSubmitted", "true");
-            form.classList.add('hidden');
-            document.getElementById('fb-success').classList.remove('hidden');
-            
-            // Auto-hide modal after 3 seconds
-            setTimeout(() => {
-                document.getElementById('feedback-modal').classList.add('hidden');
-            }, 3000);
-        } else {
-            throw new Error("Submission failed");
-        }
-    } catch (error) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Try Again";
-        alert("Oops! There was a problem sending your feedback.");
-    }
+document.getElementById('close-modal').addEventListener('click', () => {
+    fbModal.classList.add('hidden');
 });
 
+fbForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Hide form, show success message
+    fbForm.classList.add('hidden');
+    document.getElementById('fb-success').classList.remove('hidden');
+    
+    // Save to local storage so it doesn't pop up again
+    localStorage.setItem("hifzFeedbackSubmitted", "true");
+    
+    // Auto-close modal after 2 seconds
+    setTimeout(() => {
+        fbModal.classList.add('hidden');
+    }, 2000);
+});
 
 init();

@@ -1,57 +1,82 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hifz Active Recall</title>
+    <title>Hifz Pro - Active Recall</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body>
 
-    <main class="container">
-        <header>
-            <h1>Hifz Recall Tool</h1>
-            <p class="subtitle">Designed for active recall during Qur’an memorization.</p>
-        </header>
-
-        <section id="setup-panel">
-            <div class="control-group">
-                <label for="surah-select">Select Surahs to Practice:</label>
-                <select id="surah-select" multiple size="8">
-                    <option disabled>Loading data...</option>
-                </select>
-                <p class="instruction-text">Hold Ctrl/Cmd to select multiple.</p>
+    <button id="mobile-menu-toggle" class="mobile-only-btn">
+        <span class="material-symbols-rounded">menu</span>
+    </button>
+    
+    <div class="app-grid">
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <h1>Hifz Pro</h1>
+                <p class="subtitle">Active Recall Workstation</p>
+            </header>
+    
+            <div id="setup-panel" class="panel-content">
+                <label>Select Surahs</label>
+                <select id="surah-select" multiple size="12"></select>
+                <button id="btn-start" class="btn primary">Start Session</button>
             </div>
-            
-            <button id="btn-start" class="btn primary">Start Session</button>
-        </section>
-
-        <section id="session-panel" class="hidden">
-            
-            <div class="trigger-container">
-                <p class="label">Starting Verse:</p>
-                <div id="verse-trigger" class="arabic-text"></div>
+    
+            <div id="session-info" class="session-info hidden">
+                <div class="status-card">
+                    <span id="current-surah-display">--</span>
+                    <small id="ayah-number-display">Ayah --</small>
+                </div>
             </div>
-
-            <div id="recall-prompt" class="prompt-box">
-                Recall the next verses, then click Reveal.
+    
+            <footer class="sidebar-footer">
+                <p>Data provided by <a href="https://tanzil.net" target="_blank">Tanzil.net</a></p>
+            </footer>
+        </aside>
+    
+        <main class="main-stage">
+            <div id="empty-state" class="empty-state">
+                <div class="empty-icon">📖</div>
+                <h2>Hifz Pro</h2>
+                <p>Select a Surah from the sidebar to begin your recall session.</p>
             </div>
-
-            <div id="revealed-container"></div>
-
-            <div class="action-bar">
-                <button id="btn-reveal" class="btn action">Reveal Next 5</button>
-                <button id="btn-next" class="btn secondary">Next Challenge</button>
-                <button id="btn-reset" class="btn secondary">End Session</button>
-            </div>
-        </section>
-
-    </main>
-
+    
+            <section id="session-panel" class="hidden">
+                <div class="focus-area">
+                    <div class="trigger-card">
+                        <span class="badge">Recall Trigger</span>
+                        <div id="verse-trigger" class="arabic-text trigger-text"></div>
+                    </div>
+                    <div id="revealed-container" class="reveal-flow"></div>
+                </div>
+    
+                <div class="action-dock">
+                    <button id="btn-reset" class="dock-btn danger" title="End Session">
+                        <span class="material-symbols-rounded">logout</span>
+                    </button>
+                    <button id="btn-reveal" class="dock-btn primary" title="Reveal Next">
+                        <span class="material-symbols-rounded">visibility</span>
+                    </button>
+                    <button id="btn-next" class="dock-btn secondary" title="Next Challenge">
+                        <span class="material-symbols-rounded">skip_next</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+    
     <div id="feedback-modal" class="modal-overlay hidden">
         <div class="modal-card">
-            <h3>Share Your Feedback</h3>
-            <p>?This is your first session! How was your experience</p>
+            <div class="modal-header">
+                <h3>Share Your Feedback</h3>
+                <button id="close-modal" class="close-btn"><span class="material-symbols-rounded">close</span></button>
+            </div>
+            <p class="modal-desc">How was your experience with the workstation?</p>
             
             <form id="feedback-form">
                 <div class="field">
@@ -60,14 +85,13 @@
                 </div>
                 <div class="field">
                     <label for="fb-message">Message</label>
-                    <textarea id="fb-message" name="message" required placeholder="Suggestions or thoughts..."></textarea>
+                    <textarea id="fb-message" name="message" required placeholder="Suggestions..."></textarea>
                 </div>
-                <div class="fb-actions">
-                    <button type="submit" id="fb-submit" class="btn primary">Send Feedback</button>
-                </div>
+                <button type="submit" id="fb-submit" class="btn primary">Send Feedback</button>
             </form>
+            
             <div id="fb-success" class="hidden">
-                <p class="success-msg">✅ Thank you! Your feedback helps improve this tool.</p>
+                <p class="success-msg">✅ Thank you! Feedback sent.</p>
             </div>
         </div>
     </div>
