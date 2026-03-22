@@ -1,6 +1,5 @@
-/**
- * Hifz Pro - Active Recall Logic
- * Professional Version
+/*
+    Hifz Pro
  */
 
 const SURAH_NAMES = [
@@ -105,7 +104,6 @@ ui.btnStart.addEventListener('click', () => {
         ui.sessionInfo.classList.remove('hidden');
         ui.sidebar.classList.remove('active');
         
-        // Reset Mobile Menu Icon
         ui.menuToggle.innerHTML = '<span class="material-symbols-rounded">menu</span>';
         ui.btnStart.textContent = "Start Session"; 
 
@@ -187,20 +185,33 @@ document.getElementById('close-modal').addEventListener('click', () => {
     fbModal.classList.add('hidden');
 });
 
-fbForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    // Hide form, show success message
-    fbForm.classList.add('hidden');
-    document.getElementById('fb-success').classList.remove('hidden');
-    
-    // Save to local storage so it doesn't pop up again
-    localStorage.setItem("hifzFeedbackSubmitted", "true");
-    
-    // Auto-close modal after 2 seconds
-    setTimeout(() => {
-        fbModal.classList.add('hidden');
-    }, 2000);
+fbForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); 
+    const data = new FormData(fbForm);
+
+    try {
+        const response = await fetch(fbForm.action, {
+            method: fbForm.method,
+            body: data,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            fbForm.classList.add('hidden');
+            document.getElementById('fb-success').classList.remove('hidden');
+            localStorage.setItem("hifzFeedbackSubmitted", "true");
+            
+            setTimeout(() => {
+                fbModal.classList.add('hidden');
+            }, 2000);
+        } else {
+            alert("Oops! There was a problem submitting your feedback. Please try again.");
+        }
+    } catch (error) {
+        alert("Oops! Network error. Please check your connection.");
+    }
 });
 
 init();
